@@ -62,6 +62,28 @@
       const data = await response.json()
       return data
     }
+    const $form = document.getElementById('form')
+    const $home = document.getElementById('home')
+    const $featuringContainer = document.getElementById('featuring')
+
+    function setAttributes($element, attributes) { //1er parametro: elemento al cual le voy a agregar los atributos
+      for (const attribute in attributes) {                        //2do parametro: el objeto con los atributos que le voy a pasar al elemnt
+        $element.setAttribute(attribute, attributes[attribute])
+      }
+    }
+    $form.addEventListener('submit', (event)=>{ //submit es cuando damos enter en el campo de busqueda
+      event.preventDefault()
+      $home.classList.add('search-active') //Agregamos una clase al id home
+      const $loader = document.createElement('img')
+      setAttributes($loader, {
+        src: 'src/images/loader.gif',
+        height: 50,
+        width: 50,
+      })
+      $featuringContainer.append($loader)
+    })
+
+
     const actionList = await getData('https://yts.mx/api/v2/list_movies.json?genre=action')
     const dramaList = await getData('https://yts.mx/api/v2/list_movies.json?genre=drama')
     const animationList = await getData('https://yts.mx/api/v2/list_movies.json?genre=animation')
@@ -83,13 +105,19 @@
       html.body.innerHTML = HTMLString
       return html.body.children[0]
     }
+    function addEventClick($element){
+      $element.addEventListener('click', function(){
+        //alert('click')
+        showModal()
+      })
+    }
     function movieRenderList(list, $container){
       $container.children[0].remove()
       list.forEach((movie) => {
         const HTMLString = videoItemTemplate(movie)
         const movieElement = createTemplate(HTMLString)
-
-        $container.append(movieElement)
+        $container.append(movieElement) //
+        addEventClick(movieElement)
       })
     }
 
@@ -102,10 +130,6 @@
     const $animationContainer = document.getElementById('animation')
     movieRenderList (animationList.data.movies ,$animationContainer)
 
-    const $featuringContainer = document.getElementById('featuring')
-    const $form = document.getElementById('form')
-    const $home = document.getElementById('home')
-
 
     const $modal = document.getElementById('modal')
     const $overlay = document.getElementById('overlay')
@@ -115,5 +139,15 @@
     const modalImage = $modal.querySelector('img')
     const modalDescription = $modal.querySelector('p')
 
-//console.log(videoItemTemplate('src/images/covers/bitcoin.jpg', 'Bitcoin'))
+    function showModal(){
+      $overlay.classList.add('active')
+      $modal.style.animation = 'modalIn .8s forwards'
+    }
+    $hideModal.addEventListener('click', hideModal)
+    function hideModal(){
+      $overlay.classList.remove('active')
+      $modal.style.animation = 'modalOut .8s forwards'
+    }
+
+
   })()
