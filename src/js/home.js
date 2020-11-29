@@ -1,153 +1,199 @@
+async function load(){
+  //await
+  // Mortys
+  const BASE_API = 'https://rickandmortyapi.com/api/character/'
 
-// const getUserAll = new Promise(function(fulfilled, rejected) {
-//   setTimeout(function(){
-//     //rejected("Panic attack")
-//     fulfilled("Proceso 3s exitoso")
-//   }, 3000)
-//   })
-// const getUser = new Promise(function(fulfilled, rejected) {
-//   setTimeout(function() {
-//     //rejected("Panic attack")
-//     fulfilled("Proceso 5s exitoso")
-//   }, 5000)
-//   })
+  const MORTY = BASE_API + '?name=morty'
+  const RICK = BASE_API + '?name=rick'
+  const SMITH = BASE_API + '?name=smith'
 
-// getUser
-//   .then(function(){
-//     console.log("Proceso exitoso")
-//   })
-//   .catch(function(){
-//     console.log("Todo pa' triqui")
-//   })
+  async function getData(url){
+    const response = await fetch(url)
+    const data = await response.json()
+    return data
+}
+  const $form = document.querySelector('#form')
 
-// Promise.race([
-//   getUser,
-//   getUserAll,
-// ])
-// .then(function(msg){
-//   console.log(msg)
-// })
-// .catch(function(msg){
-//   console.log(msg)
-// })
+  const $featuringContainer = document.querySelector('#featuring')
 
-
-// $.ajax('https://randomuser.me/api/wewdxc', {
-//   method: 'GET',
-//   success: function(data){
-//     console.log(data)
-//   },
-//   error: function(error){
-//     console.log(error)
-//   }
-// })
-
-// fetch('https://randomuser.me/api/')
-//   .then(function(response){
-//     // console.log(response)
-//     return response.json()
-//   })
-//   .then(function(user){
-//     // console.log('user', user)
-//      console.log('user', user.results[0].name.first)
-//   })
-//   .catch(function(){
-//     console.log("Algo falló")
-//   });
-
-(async function load(){           //encerrando toda la funcion la autollamamos
-    //await
-    async function getData(url){
-      const response = await fetch(url)
-      const data = await response.json()
-      return data
+  function setAttributes($element, attributes){
+    for (const attribute in attributes){
+      $element.setAttribute(attribute, attributes[attribute])
     }
-    const $form = document.getElementById('form')
-    const $home = document.getElementById('home')
-    const $featuringContainer = document.getElementById('featuring')
+  }
 
-    function setAttributes($element, attributes) { //1er parametro: elemento al cual le voy a agregar los atributos
-      for (const attribute in attributes) {                        //2do parametro: el objeto con los atributos que le voy a pasar al elemnt
-        $element.setAttribute(attribute, attributes[attribute])
-      }
-    }
-    $form.addEventListener('submit', (event)=>{ //submit es cuando damos enter en el campo de busqueda
-      event.preventDefault()
-      $home.classList.add('search-active') //Agregamos una clase al id home
-      const $loader = document.createElement('img')
-      setAttributes($loader, {
-        src: 'src/images/loader.gif',
-        height: 50,
-        width: 50,
-      })
-      $featuringContainer.append($loader)
+  function featuringTemplate(personaje){
+    return(
+     `
+     <div class="featuring">
+       <div class="featuring-image">
+         <img src="${personaje.image}" width="70" alt="">
+       </div>
+       <div class="featuring-content">
+         <p class="featuring-title">${personaje.name}</p>
+         <p class="featuring-album">${personaje.species}</p>
+       </div>
+     </div>
+     `
+    )
+  }
+
+  $form.addEventListener('submit', async (event)=> {
+    event.preventDefault()
+    $home.classList.add('search-active')
+    const $loader = document.createElement('img')
+    setAttributes($loader, {
+      src: 'src/images/loader.gif',
+      height: 50,
+      width: 50,
     })
-
-
-    const actionList = await getData('https://yts.mx/api/v2/list_movies.json?genre=action')
-    const dramaList = await getData('https://yts.mx/api/v2/list_movies.json?genre=drama')
-    const animationList = await getData('https://yts.mx/api/v2/list_movies.json?genre=animation')
-    console.log(actionList, dramaList, animationList)
-
-    function videoItemTemplate(movie){
-      return (
-        `<div class="primaryPlaylistItem">
-        <div class="primaryPlaylistItem-image">
-        <img src="${movie.medium_cover_image}">
-        </div>
-        <h4 class="primaryPlaylistItem-title">
-        ${movie.title}
-        </h4>`
-      )
+    $featuringContainer.append($loader)
+    const data = new FormData($form)
+    try {
+      const personaje = await getData (`${BASE_API}?name=${data.get('name')}`)
+      const HTMLString = featuringTemplate(personaje.results[0])
+      $featuringContainer.innerHTML = HTMLString
+    }catch(error){
+      alert('Sorry, no results for your search')
+      $loader.remove()
+      $home.classList.remove('search-active')
     }
-    function createTemplate(HTMLString) {
+  })
+
+  // console.log($ricksContainer, $mortysContainer, $smithsContainer)
+
+  function charTemplate (item, category) {
+    let name = item.name
+    let specie = item.species
+    let src = item.image
+    let char = item.id
+    return(
+    `
+    <div class="primaryPlaylistItem" data-id="${char}" data-category="${category}">
+      <div class="primaryPlaylistItem-image">
+        <img src="${src}" width="50" height="50" alt="">
+      </div>
+      <h4 class="primaryPlaylist-title">${name}</h4>
+      <p class="primaryPlaylist-subtitle">${specie}</p>
+  </div>
+    `
+     )
+  }
+  function modalTemplate(data){
+    let name = data.name
+    let image = data.image
+    return (
+      `
+      <h1>${name}</h1>
+      <div class="modal-content">
+        <img src="${image}" alt="" width="170" height="256">
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione impedit maiores enim alias ex accusantium quasi cum autem, nam, voluptas tenetur laudantium quod! Odit voluptate illo, voluptas vel quia, quae.</p>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn primary" id="hide-modal">Cerrar Modal</button>
+      </div>
+      `
+    )
+  }
+
+  function addEventClick($element) {
+    $element.addEventListener('click', () => {
+      showModal($element)
+    })
+  }
+
+  function renderTemplate(character, container, category){
+    character.forEach((item) => {
+      const HTMLString = charTemplate(item, category)
       const html = document.implementation.createHTMLDocument()
       html.body.innerHTML = HTMLString
-      return html.body.children[0]
-    }
-    function addEventClick($element){
-      $element.addEventListener('click', function(){
-        //alert('click')
-        showModal()
+      let charElement = html.body.children[0]
+      container.append(charElement)
+      const image = charElement.querySelector('img')
+      image.addEventListener('load', ()=>{
+        charElement.classList.add('fadeIn')
       })
+      addEventClick(charElement)
+    });
+  }
+
+  function modalRender(data){
+    const HTMLString = modalTemplate(data)
+    const html = document.implementation.createHTMLDocument()
+    html.body.innerHTML = HTMLString
+    let element = html.body
+    $modal.append(element)
+  }
+
+  async function cacheExist(category, url){
+    const listName = `${category}List`
+    const cacheList = window.localStorage.getItem('listName')
+    if (cacheList){
+      return JSON.parse(cacheList)
+    } const {results: data } = await getData(url)
+      window.localStorage.setItem(listName, JSON.stringify(data))
+
+      return data
+  }
+  // const {results: rickList } = await getData(RICK)
+  const rickList = await cacheExist('rick', RICK)
+  // window.localStorage.setItem('rickList', JSON.stringify(rickList))
+  const $ricksContainer = document.querySelector('#ricks')
+  renderTemplate(rickList, $ricksContainer, 'Ricks')
+
+  const mortyList = await cacheExist('morty', MORTY)
+  // window.localStorage.setItem('mortyList', JSON.stringify(mortyList))
+  const $mortysContainer = document.querySelector('#mortys')
+  renderTemplate(mortyList, $mortysContainer, 'Mortys')
+
+  const smithList = await cacheExist('smith', SMITH)
+  // window.localStorage.setItem('smithList', JSON.stringify(smithList))
+  const $smithsContainer = document.querySelector('#smiths')
+  renderTemplate(smithList, $smithsContainer, 'Smiths')
+
+
+  const $home = document.querySelector('#home')
+  // console.log($form, $home, $featuringContainer)
+  //const $home = document.getElementById('home')
+  const $overlay = document.getElementById('overlay')
+  const $modal = document.getElementById('modal')
+
+
+  const $modalTitle = $modal.querySelector('h1')
+  const $modalDescription = $modal.querySelector('p')
+  const $modalImage = $modal.querySelector('img')
+  console.log($modal, $overlay, $home)
+
+  function findById(list, id){
+    return list.find((results) => results.id === parseInt(id, 10))
+  }
+  function findChar(id, category) {
+    switch (category) {
+      case 'Ricks': {
+        return findById(rickList, id)
+      }
+      case 'Mortys':{
+        return findById(mortyList, id)
+      }
+      default: {
+        return findById(smithList, id)
+      }
     }
-    function movieRenderList(list, $container){
-      $container.children[0].remove()
-      list.forEach((movie) => {
-        const HTMLString = videoItemTemplate(movie)
-        const movieElement = createTemplate(HTMLString)
-        $container.append(movieElement) //
-        addEventClick(movieElement)
-      })
-    }
-
-    const $actionContainer = document.querySelector('#action')
-    movieRenderList (actionList.data.movies ,$actionContainer)
-
-    const $dramaContainer = document.getElementById('drama')
-    movieRenderList (dramaList.data.movies ,$dramaContainer)
-
-    const $animationContainer = document.getElementById('animation')
-    movieRenderList (animationList.data.movies ,$animationContainer)
-
-
-    const $modal = document.getElementById('modal')
-    const $overlay = document.getElementById('overlay')
+  }
+  function showModal($element){
+    $overlay.classList.add('active')
+    $modal.style.animation = 'modalIn .8s forwards'
+    const id = $element.dataset.id
+    const category = $element.dataset.category
+    const data = findChar(id, category)
+    modalRender(data)
     const $hideModal = document.getElementById('hide-modal')
-
-    const modalTitle = $modal.querySelector('h1')
-    const modalImage = $modal.querySelector('img')
-    const modalDescription = $modal.querySelector('p')
-
-    function showModal(){
-      $overlay.classList.add('active')
-      $modal.style.animation = 'modalIn .8s forwards'
-    }
     $hideModal.addEventListener('click', hideModal)
-    function hideModal(){
-      $overlay.classList.remove('active')
-      $modal.style.animation = 'modalOut .8s forwards'
-    }
+  }
+  function hideModal(){
+    $overlay.classList.remove('active')
+    $modal.style.animation = 'modalOut .8s forwards'
+  }
 
-
-  })()
+}
+load()

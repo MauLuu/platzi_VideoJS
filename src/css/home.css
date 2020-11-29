@@ -6,6 +6,7 @@ body {
 
 /*home layout*/
 .home {
+  background-color: #C4C7E1;
   display: grid;
   height: 100vh;
   grid-template-columns: 350px 1fr;
@@ -241,7 +242,7 @@ body {
 
 
 .fadeIn {
-  animation: 1000ms fadeIn;
+  animation: 5000ms fadeIn;
 }
 
 @keyframes fadeIn {
